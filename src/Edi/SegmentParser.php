@@ -18,11 +18,21 @@ class SegmentParser
         $documentParsed = array();
         foreach ($documents as $document) {
             foreach ($document->getSegments() as $segment) {
-                if (isset(Edi::$segmentMapping[$segment[0]])) {
-                    $className = Edi::$segmentMapping[$segment[0]];
+                $code = $segment[0];
+
+                if (! isset(Edi::$segmentMapping[$code])) {
+                    ray("Код $code отсутствует в Edi::\$segmentMapping")->red();
+                } else {
+                    try {
+                        $className = Edi::$segmentMapping[$code];
+                        if (! class_exists($className)) {
+                            dd("Класс `$className` не существует");
+                        }
+                    } catch (\Exception $e) {
+                        dd('Ошибка при получении класса', $segment, $e);
+                    }
+
                     $documentParsed[] = (new $className)->parse($segment);
-                }else{
-                    //info('Segment not found: '.$segment[0]);
                 }
             }
         }

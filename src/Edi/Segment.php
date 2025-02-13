@@ -13,6 +13,8 @@ class Segment implements SegmentInterface
      */
     public const EDI_QUALIFIER_KEY = 'edi_qualifier';
 
+    public const MAX_SEGMENTS_KEY = 'max_segments';
+
     /**
      * Map segment indexes into keys
      * @var array
@@ -55,7 +57,11 @@ class Segment implements SegmentInterface
     {
         $content = [];
         if (is_array($array)) {
-            foreach ($this->segmentMapping as $index => $key) {
+            $segmentMapping = $this->segmentMapping;
+            if (isset($array[self::MAX_SEGMENTS_KEY])) {
+                $segmentMapping = array_slice($segmentMapping, 0, $array[self::MAX_SEGMENTS_KEY] + 1);
+            }
+            foreach ($segmentMapping as $index => $key) {
                 $value = $array[$key] ?? '';
                 if (isset($this->callFunction[$index])) {
                     $value = call_user_func_array($this->callFunction[$index]['name'], array_merge([$value], $this->callFunction[$index]['args']));
